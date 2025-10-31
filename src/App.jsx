@@ -191,7 +191,7 @@ export default function ImpostorGame() {
           <div className="bg-white rounded-3xl shadow-2xl p-8 animate-fadeIn">
             <div className="text-center mb-8">
               <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-2">
-                Juego de Impostores
+                Juego Impostores
               </h1>
               <p className="text-gray-600">Configura tu partida</p>
             </div>
