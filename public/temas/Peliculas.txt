@@ -1,20 +1,20 @@
-Titanic
-Forrest Gump
-El padre de la novia
-Matrix
-Gladiador
-Jurassic Park
-Regreso al futuro
+Harry Potter
+El Señor de los anillos
+Iron Man
+Star Wars
 Avatar
-Inception
-El señor de los anillos
-Star Wars: Una nueva esperanza
-Los Vengadores
-Harry Potter y la piedra filosofal
+Jurassic Park
+Regreso al futuro
+Matrix
+Forrest Gump
+Titanic
+Batman
 Interestelar
-El caballero oscuro
-La La Land
-Avatar: El camino del agua
-La La Land
-Dunkerque
-La La Land
+Piratas del Caribe
+Terminator
+Spider-Man
+Alien
+Predator
+Superman
+It
+Pesadilla antes de Navidad

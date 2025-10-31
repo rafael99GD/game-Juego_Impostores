@@ -1,0 +1,20 @@
+Steve
+Creeper
+Enderman
+Zombie
+Esqueleto
+Aldeano
+Pig
+Oveja
+Vaca
+Diamante
+Redstone
+Nether
+Ender Dragon
+Espada
+Pico
+Cubo de agua
+Horno
+Cofre
+Granja
+Lava

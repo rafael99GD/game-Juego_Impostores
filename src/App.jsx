@@ -15,25 +15,80 @@ export default function ImpostorGame() {
   const [numImpostors, setNumImpostors] = useState(1);
   const [showTransition, setShowTransition] = useState(false);
   
-  // Nuevo: Modo de juego y temas
-  const [gameMode, setGameMode] = useState('custom'); // 'custom' o 'themes'
+  // Modo de juego y temas
+  const [gameMode, setGameMode] = useState('custom');
+  const [categories, setCategories] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState('');
   const [availableThemes, setAvailableThemes] = useState([]);
   const [selectedTheme, setSelectedTheme] = useState('');
   const [themeWords, setThemeWords] = useState([]);
   const BASE_URL = import.meta.env.BASE_URL;
 
-  // Cargar temas disponibles al montar el componente
+  // Cargar datos guardados al iniciar
   useEffect(() => {
     loadAvailableThemes();
+    loadSavedData();
   }, []);
+
+  // Guardar datos cuando cambien
+  useEffect(() => {
+    saveData();
+  }, [players, words, gameMode, selectedTheme, selectedCategory, numImpostors]);
+
+  const loadSavedData = () => {
+    try {
+      const saved = localStorage.getItem('impostorGameData');
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.players) setPlayers(data.players);
+        if (data.words) setWords(data.words);
+        if (data.gameMode) setGameMode(data.gameMode);
+        if (data.selectedCategory) setSelectedCategory(data.selectedCategory);
+        if (data.selectedTheme) {
+          setSelectedTheme(data.selectedTheme);
+          loadThemeWords(data.selectedTheme);
+        }
+        if (data.numImpostors) setNumImpostors(data.numImpostors);
+      }
+    } catch (error) {
+      console.error('Error al cargar datos guardados:', error);
+    }
+  };
+
+  const saveData = () => {
+    try {
+      const dataToSave = {
+        players,
+        words,
+        gameMode,
+        selectedCategory,
+        selectedTheme,
+        numImpostors
+      };
+      localStorage.setItem('impostorGameData', JSON.stringify(dataToSave));
+    } catch (error) {
+      console.error('Error al guardar datos:', error);
+    }
+  };
 
   const loadAvailableThemes = async () => {
     try {
-      // Leer el archivo index.json que contiene la lista de temas
       const response = await fetch(`${import.meta.env.BASE_URL}temas/index.json`);
       if (response.ok) {
         const data = await response.json();
-        setAvailableThemes(data.temas || []);
+        
+        // Si tiene estructura de categorías
+        if (data.categorias) {
+          setCategories(data.categorias);
+          // Mostrar todos los temas por defecto (sin categoría seleccionada)
+          // Usar Set para eliminar duplicados
+          const allThemes = [...new Set(Object.values(data.categorias).flat())];
+          setAvailableThemes(allThemes);
+        } 
+        // Si tiene estructura antigua (solo array de temas)
+        else if (data.temas) {
+          setAvailableThemes(data.temas || []);
+        }
       } else {
         console.error('No se pudo cargar index.json');
         setAvailableThemes([]);
@@ -44,10 +99,27 @@ export default function ImpostorGame() {
     }
   };
 
+  const selectCategory = (category) => {
+    // Si la categoría clickeada ya está seleccionada, deseleccionar (mostrar todos)
+    if (selectedCategory === category) {
+      setSelectedCategory('');
+      // Usar Set para eliminar duplicados al mostrar todos
+      const allThemes = [...new Set(Object.values(categories).flat())];
+      setAvailableThemes(allThemes);
+      setSelectedTheme('');
+      setThemeWords([]);
+    } 
+    // Si se selecciona una nueva categoría
+    else {
+      setSelectedCategory(category);
+      setAvailableThemes(categories[category] || []);
+      setSelectedTheme('');
+      setThemeWords([]);
+    }
+  };
+
   const formatThemeName = (filename) => {
-    // Quitar la extensión .txt
     let name = filename.replace('.txt', '');
-    // Reemplazar guiones bajos por espacios
     name = name.replace(/_/g, ' ');
     return name;
   };
@@ -57,7 +129,6 @@ export default function ImpostorGame() {
       const response = await fetch(`${import.meta.env.BASE_URL}temas/${themeName}`);
       if (response.ok) {
         const text = await response.text();
-        // Dividir por líneas y filtrar líneas vacías
         const wordsList = text
           .split('\n')
           .map(line => line.trim())
@@ -114,6 +185,7 @@ export default function ImpostorGame() {
     }
 
     let wordToUse;
+    let themeNameUsed = null;
 
     if (gameMode === 'themes') {
       if (themeWords.length === 0) {
@@ -121,12 +193,14 @@ export default function ImpostorGame() {
         return;
       }
       wordToUse = themeWords[Math.floor(Math.random() * themeWords.length)];
+      themeNameUsed = formatThemeName(selectedTheme);
     } else {
       if (words.length === 0) {
         alert('Necesitas al menos 1 palabra para jugar');
         return;
       }
       wordToUse = words[Math.floor(Math.random() * words.length)].word;
+      themeNameUsed = null; // No hay tema en modo personalizado
     }
     
     if (numImpostors >= players.length) {
@@ -147,7 +221,7 @@ export default function ImpostorGame() {
       word: impositorIndices.has(idx) ? null : wordToUse
     }));
 
-    setGameData({ players: playersWithRoles, word: wordToUse });
+    setGameData({ players: playersWithRoles, word: wordToUse, themeName: themeNameUsed });
     setCurrentPlayerIndex(0);
     setIsCardFlipped(false);
     setScreen('game');
@@ -191,7 +265,7 @@ export default function ImpostorGame() {
         {screen === 'setup' && (
           <div className="bg-white rounded-3xl shadow-2xl p-8 animate-fadeIn">
             <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-2">
+              <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-3 pb-1">
                 Juego Impostores
               </h1>
               <p className="text-gray-600">Configura tu partida</p>
@@ -279,6 +353,29 @@ export default function ImpostorGame() {
             {/* Sección de Temas */}
             {gameMode === 'themes' && (
               <div className="mb-8">
+                {/* Selector de Categorías */}
+                {Object.keys(categories).length > 0 && (
+                  <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Categoría</h2>
+                    <div className="grid grid-cols-2 gap-3">
+                      {Object.keys(categories).map((category) => (
+                        <button
+                          key={category}
+                          onClick={() => selectCategory(category)}
+                          className={`p-4 rounded-xl font-medium transition-all transform hover:scale-105 ${
+                            selectedCategory === category
+                              ? 'bg-gradient-to-br from-purple-600 to-pink-600 text-white shadow-lg'
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          }`}
+                        >
+                          {category}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Selector de Temas */}
                 <div className="flex items-center gap-2 mb-4">
                   <Sparkles className="text-pink-600" />
                   <h2 className="text-2xl font-bold text-gray-800">Selecciona un Tema</h2>
@@ -287,7 +384,7 @@ export default function ImpostorGame() {
                 {availableThemes.length === 0 ? (
                   <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 text-center">
                     <p className="text-yellow-800 font-medium">
-                      No se encontraron temas. Asegúrate de crear archivos .txt en la carpeta /public/temas/
+                      No se encontraron temas en esta categoría
                     </p>
                   </div>
                 ) : (
@@ -308,11 +405,29 @@ export default function ImpostorGame() {
                   </div>
                 )}
                 
-                {selectedTheme && (
-                  <div className="mt-4 bg-green-50 border-2 border-green-200 rounded-xl p-4">
-                    <p className="text-green-800 font-medium text-center">
-                      ✓ Tema seleccionado: <span className="font-bold">{formatThemeName(selectedTheme)}</span> ({themeWords.length} palabras)
-                    </p>
+                {selectedTheme && themeWords.length > 0 && (
+                  <div className="mt-4">
+                    <div className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-3">
+                      <p className="text-green-800 font-medium text-center">
+                        ✓ Tema seleccionado: <span className="font-bold">{formatThemeName(selectedTheme)}</span> ({themeWords.length} palabras)
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-xl p-4">
+                      <h3 className="font-bold text-purple-800 mb-3 text-center">Palabras disponibles:</h3>
+                      <div className="max-h-48 overflow-y-auto bg-white rounded-lg p-3">
+                        <div className="flex flex-wrap gap-2">
+                          {themeWords.map((word, idx) => (
+                            <span 
+                              key={idx} 
+                              className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-3 py-1 rounded-full text-sm font-medium"
+                            >
+                              {word}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
@@ -430,11 +545,7 @@ export default function ImpostorGame() {
               </div>
             ) : (
               <div className="absolute inset-0 flex items-center justify-center animate-slideUp">
-                <div className={`rounded-3xl shadow-2xl p-12 text-center w-full max-w-md ${
-                  currentPlayer.isImpostor 
-                    ? 'bg-gradient-to-br from-red-600 to-red-800' 
-                    : 'bg-gradient-to-br from-green-500 to-green-700'
-                }`}>
+                <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-3xl shadow-2xl p-12 text-center w-full max-w-md">
                   <div className="mb-8">
                     <div className="text-6xl mb-4">
                       {currentPlayer.isImpostor ? '🎭' : '✅'}
@@ -442,10 +553,37 @@ export default function ImpostorGame() {
                     <h2 className="text-3xl font-bold text-white mb-4">
                       {currentPlayer.isImpostor ? '¡IMPOSTOR!' : '¡JUGADOR!'}
                     </h2>
+                    
+                    {/* Mostrar tema si existe */}
+                    {gameData.themeName && (
+                      <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 mb-4">
+                        <p className="text-sm text-white/80 mb-1">Lista:</p>
+                        <p className="text-lg font-bold text-white">
+                          {gameData.themeName}
+                        </p>
+                      </div>
+                    )}
+                    
                     <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-6">
-                      <p className="text-2xl font-bold text-white">
-                        {currentPlayer.isImpostor ? 'Descubre la palabra secreta' : currentPlayer.word}
-                      </p>
+                      {currentPlayer.isImpostor ? (
+                        <>
+                          <p className="text-xl font-bold text-white mb-2">
+                            Descubre la palabra secreta
+                          </p>
+                          {gameData.themeName && (
+                            <p className="text-sm text-white/90">
+                              La palabra es de la lista: {gameData.themeName}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm text-white/80 mb-2">Tu palabra es:</p>
+                          <p className="text-2xl font-bold text-white">
+                            {currentPlayer.word}
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                   <button
