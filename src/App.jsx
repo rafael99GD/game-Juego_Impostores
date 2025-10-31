@@ -20,6 +20,7 @@ export default function ImpostorGame() {
   const [availableThemes, setAvailableThemes] = useState([]);
   const [selectedTheme, setSelectedTheme] = useState('');
   const [themeWords, setThemeWords] = useState([]);
+  const BASE_URL = import.meta.env.BASE_URL;
 
   // Cargar temas disponibles al montar el componente
   useEffect(() => {
@@ -29,7 +30,7 @@ export default function ImpostorGame() {
   const loadAvailableThemes = async () => {
     try {
       // Leer el archivo index.json que contiene la lista de temas
-      const response = await fetch('/temas/index.json');
+      const response = await fetch(`${import.meta.env.BASE_URL}temas/index.json`);
       if (response.ok) {
         const data = await response.json();
         setAvailableThemes(data.temas || []);
@@ -53,7 +54,7 @@ export default function ImpostorGame() {
 
   const loadThemeWords = async (themeName) => {
     try {
-      const response = await fetch(`/temas/${themeName}`);
+      const response = await fetch(`${import.meta.env.BASE_URL}temas/${themeName}`);
       if (response.ok) {
         const text = await response.text();
         // Dividir por líneas y filtrar líneas vacías
