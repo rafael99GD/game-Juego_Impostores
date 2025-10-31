@@ -16,5 +16,5 @@ Hipopótamo
 Rinoceronte
 Cocodrilo
 Serpiente
-Ave
+Aguila
 Pez

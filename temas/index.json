@@ -1,12 +1,38 @@
 {
-  "temas": [
-    "Disney.txt",
-	"Peliculas.txt",
-	"Series.txt",
-	"League_Of_Legends.txt",
-	"Valorant.txt",
-	"Animales.txt",
-	"Videojuegos.txt",
-	"Genshin_Impact.txt"
-  ]
+  "categorias": {
+    "🎮 Videojuegos": [
+      "Clash_Royale.txt",
+      "Genshin_Impact.txt",
+      "League_Of_Legends.txt",
+      "Minecraft.txt",
+      "Valorant.txt",
+      "Videojuegos.txt",
+      "Personajes_de_Videojuegos.txt",
+      "Pokemons.txt"
+    ],
+    "🎬 Entretenimiento": [
+      "Anime.txt",
+      "Disney.txt",
+      "Dreamworks.txt",
+      "Peliculas.txt",
+      "Series.txt",
+      "Series_Animadas.txt"
+    ],
+    "🦸 Personajes": [
+      "Superheroes.txt",
+	  "Personajes_de_Videojuegos.txt",
+	  "League_Of_Legends.txt",
+      "Minecraft.txt",
+      "Valorant.txt",
+	  "Genshin_Impact.txt"
+    ],
+    "🌍 Mundo Real": [
+      "Animales.txt",
+      "Deportes.txt",
+      "Frutas.txt",
+      "Paises.txt",
+      "Marcas_de_Coche.txt",
+      "Redes_Sociales.txt"
+    ]
+  }
 }
