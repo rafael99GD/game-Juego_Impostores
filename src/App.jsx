@@ -24,6 +24,9 @@ export default function ImpostorGame() {
   const [themeWords, setThemeWords] = useState([]);
   const BASE_URL = import.meta.env.BASE_URL;
 
+  // Versión del localStorage - Incrementa este número cuando hagas cambios importantes
+  const STORAGE_VERSION = 2;
+
   // Cargar datos guardados al iniciar
   useEffect(() => {
     loadAvailableThemes();
@@ -40,6 +43,14 @@ export default function ImpostorGame() {
       const saved = localStorage.getItem('impostorGameData');
       if (saved) {
         const data = JSON.parse(saved);
+        
+        // Verificar versión del localStorage
+        if (data.version !== STORAGE_VERSION) {
+          console.log('Nueva versión detectada. Limpiando datos antiguos...');
+          localStorage.removeItem('impostorGameData');
+          return; // No cargar datos antiguos
+        }
+        
         if (data.players) setPlayers(data.players);
         if (data.words) setWords(data.words);
         if (data.gameMode) setGameMode(data.gameMode);
@@ -52,12 +63,15 @@ export default function ImpostorGame() {
       }
     } catch (error) {
       console.error('Error al cargar datos guardados:', error);
+      // Si hay error, limpiar localStorage corrupto
+      localStorage.removeItem('impostorGameData');
     }
   };
 
   const saveData = () => {
     try {
       const dataToSave = {
+        version: STORAGE_VERSION, // Guardar versión actual
         players,
         words,
         gameMode,
@@ -250,6 +264,20 @@ export default function ImpostorGame() {
     setShowTransition(false);
   };
 
+  const clearAllData = () => {
+    if (confirm('¿Estás seguro de que quieres borrar todos los datos guardados (jugadores, palabras, configuración)?')) {
+      localStorage.removeItem('impostorGameData');
+      setPlayers([]);
+      setWords([]);
+      setGameMode('custom');
+      setSelectedCategory('');
+      setSelectedTheme('');
+      setThemeWords([]);
+      setNumImpostors(1);
+      alert('Datos borrados correctamente');
+    }
+  };
+
   const currentPlayer = gameData?.players[currentPlayerIndex];
 
   const maxImpostors = Math.max(1, Math.floor(players.length / 2));
@@ -269,6 +297,15 @@ export default function ImpostorGame() {
                 Juego Impostores
               </h1>
               <p className="text-gray-600">Configura tu partida</p>
+              
+              {/* Botón para limpiar datos */}
+              <button
+                onClick={clearAllData}
+                className="mt-4 text-sm text-gray-400 hover:text-red-500 transition-colors"
+                title="Borrar todos los datos guardados"
+              >
+                🗑️ Limpiar datos guardados
+              </button>
             </div>
 
             {/* Players Section */}
