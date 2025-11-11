@@ -3,6 +3,6 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/Juego_Impostores/',
+  base: '/game-Juego_Impostores/',
   publicDir: 'public'
 })
