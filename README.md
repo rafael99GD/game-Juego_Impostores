@@ -1,7 +1,7 @@
 
 # 🎭 Juego de Impostores
 
-![Preview](src/Assets/Screenshots/preview.png)
+![Preview](https://github.com/rafael99GD/game-Juego_Impostores/raw/main/src/assets/Screenshots/preview.png)
 
 Un divertido juego tipo **“Quién es el impostor”** hecho en **React + Vite**, donde tú y tus amigos podéis jugar localmente desde un solo dispositivo.  
 Cada jugador ve su rol secreto, y el impostor debe intentar adivinar la palabra sin ser descubierto.  
